@@ -1,5 +1,5 @@
 import React from "react";
-import assets from "../assets/assets";
+import assets, { userDummyData } from "../assets/assets";
 import { useNavigate } from "react-router-dom";
 
 const Sidebar = ({ selectedUser, setSelectedUser }) => {
@@ -29,13 +29,30 @@ const Sidebar = ({ selectedUser, setSelectedUser }) => {
             </div>
           </div>
         </div>
-        <div>
+        <div className="bg-[#282142] rounded-full flex items-center gap-2 py-3 px-4 mt-5">
           <img src={assets.search_icon} alt="Search" className="w-3" />
           <input
             type="text"
             className="bg-transparent border-none outline-none text-white text-xs placeholder-[#c8c8c8] flex-1"
+            placeholder="Search User..."
           />
         </div>
+      </div>
+
+      <div className="flex flex-col">
+        {userDummyData.map((user, index) => (
+          <div>
+            <img
+              src={user?.profilePic || assets.avatar_icon}
+              alt=""
+              className="w-8.75 aspect-square rounded-full"
+            />
+            <div className="flex flex-col leading-5">
+              <p>{user.fullName}</p>
+              {index < 3 ? <span>Online</span> : <span>Offline</span>}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
