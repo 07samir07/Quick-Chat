@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import Sidebar from "../components/Sidebar";
-import ChatContainer from "../components/ChatContainer";
-import RightSideBar from "../components/RightSideBar";
+import Sidebar from "../components/Sidebar.jsx";
+import ChatContainer from "../components/ChatContainer.jsx";
+import RightSideBar from "../components/RightSideBar.jsx";
 
 const HomePage = () => {
   const [selectedUser, setSelectedUser] = useState(false);
