@@ -58,4 +58,7 @@ export const login = async (req, res) => {
   }
 };
 
-//
+//CONTROLLER TO CHECK IF USER IS AUTHENTICATED
+export const checkAuth = (req, res) => {
+  res.json({ succes: true, user: req.user });
+};
