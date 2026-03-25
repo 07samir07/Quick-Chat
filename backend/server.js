@@ -5,11 +5,35 @@ import http from "http";
 import { connectDB } from "./lib/db.js";
 import userRouter from "./routes/user.route.js";
 import messageRouter from "./routes/message.route.js";
+import { Server } from "socket.io";
 
 //CREATE EXPRESS APP AND HTTP SERVER
 const app = express();
 
 const server = http.createServer(app);
+
+//INITIALIZE SOCKET.IO SERVER
+export const io = new Server(server, {
+  cors: { origin: "*" },
+});
+
+//STOR ONLINE USERS
+export const userSocketMap = {}; //{userId:socketId}
+
+//SOCKET.IO CONNECTION HANDLER
+io.on("connection", (socket) => {
+  const userId = socket.handshake.query.userId;
+  console.log("User Connected", userId);
+  if (userId) userSocketMap[userId] = socket.id;
+
+  //EMIT ONLINE USERS TO ALL CONNECTED CLIENTS
+  io.emit("getOnlineUsers", Object.keys(userSocketMap));
+  socket.on("Disconnect", () => {
+    console.log("User Disconnected", userId);
+    delete userSocketMap[userId];
+    io.emit("getOnlineUsers", Object.keys(userSocketMap));
+  });
+});
 
 //MIDDLEWARE SETUP
 app.use(express.json({ limit: "4mb" }));
