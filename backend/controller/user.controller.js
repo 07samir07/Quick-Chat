@@ -38,3 +38,24 @@ export const signup = async (req, res) => {
     res.json({ succes: false, message: error.message });
   }
 };
+
+//LOGIN  A USER
+export const login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const userData = await User.findOne({ email });
+
+    const isPasswordCorrect = await bcrypt.compare(password, userData.password);
+
+    if (!isPasswordCorrect) {
+      res.json({ success: false, message: "Invalid credentitals" });
+    }
+    const token = generateToken(newUser._id);
+    res.json({ succes: true, userData, token, message: "Login successful" });
+  } catch (error) {
+    console.log(error.message);
+    res.json({ success: false, message: error.message });
+  }
+};
+
+//
