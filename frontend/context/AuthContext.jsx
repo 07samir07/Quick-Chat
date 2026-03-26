@@ -30,7 +30,7 @@ export const AuthProvider = ({ children }) => {
   //LOGIN FUNCTION TO HANDLE USER AUTHENTICATION AND SOCKET CONNECTION
   const login = async (state, credentials) => {
     try {
-      const { data } = await axios.post(`/api/auth/${state} `, credentials);
+      const { data } = await axios.post(`/api/auth/${state}`, credentials);
       if (data.success) {
         setAuthUser(data.userData);
         connectSocket(data.userData);
@@ -42,7 +42,7 @@ export const AuthProvider = ({ children }) => {
         toast.error(data.message);
       }
     } catch (error) {
-      toast.headers(error.message);
+      toast.error(error.message);
     }
   };
 
@@ -82,7 +82,7 @@ export const AuthProvider = ({ children }) => {
     newSocket.connect();
     setSocket(newSocket);
 
-    newSocket.on("getOnlineUsers", () => {
+    newSocket.on("getOnlineUsers", (userIds) => {
       setOnlineUsers(userIds);
     });
   };
