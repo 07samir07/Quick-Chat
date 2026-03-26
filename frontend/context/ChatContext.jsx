@@ -27,6 +27,33 @@ export const ChatProvider = ({ children }) => {
   };
 
   //FUNCTION TO GET MESSAGES FOR SELECTED USER
+  const getMessages = async (userId) => {
+    try {
+      const { data } = await axios.get(`/api/messages/${userId}`);
+      if (data.success) {
+        setMessages(data.messages);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  //FUNCTION TO SEND MESSAGE TO SELECTED USER
+  const sendMessage = async (messageData) => {
+    try {
+      const { data } = await axios.post(
+        `/api/messages/send/${selectedUser._id}`,
+        messageData,
+      );
+      if (data.success) {
+        setMessages((prevMessages) => [...prevMessages, data.newMessage]);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
 
   const value = {};
   return <ChatContext.Provider>{children}</ChatContext.Provider>;
