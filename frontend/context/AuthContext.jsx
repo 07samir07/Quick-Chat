@@ -9,9 +9,7 @@ export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem("token"));
-
   const [authUser, setAuthUser] = useState(null);
-
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [socket, setSocket] = useState(null);
 
@@ -27,6 +25,36 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       toast.error(error.message);
     }
+  };
+
+  //LOGIN FUNCTION TO HANDLE USER AUTHENTICATION AND SOCKET CONNECTION
+  const login = async (state, credentials) => {
+    try {
+      const { data } = await axios.post(`/api/auth/${state} `, credentials);
+      if (data.success) {
+        setAuthUser(data.userData);
+        connectSocket(data.userData);
+        axios.defaults.headers.common["token"] = data.token;
+        setToken(data.token);
+        localStorage.setItem("token", data.token);
+        toast.success(data.message);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.headers(error.message);
+    }
+  };
+
+  //LOGOUT FUNCTION TO HANDLE USER LOGOUT AND SOCKET DISCONNECTION
+  const logout = async () => {
+    localStorage.removeItem("token");
+    setToken(null);
+    setAuthUser(null);
+    setOnlineUsers([]);
+    axios.defaults.headers.common["token"] = null;
+    toast.success("Logged out successfully");
+    socket.disconnect();
   };
 
   //CONNECT SOCKET FUNCTION TO HANDLE SOCKET CONNECTTION AND ONLINE USERS UPDATES
