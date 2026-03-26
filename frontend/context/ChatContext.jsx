@@ -55,6 +55,25 @@ export const ChatProvider = ({ children }) => {
     }
   };
 
+  //FUNCTION TO SUBSCRIBE TO MESSAGES FOR SELECTED USER
+  const subscribeToMessages = async () => {
+    if (!socket) return;
+    socket.on("newMessage", (newMessage) => {
+      if (selectedUser && newMessage.senderId === selectedUser._id) {
+        newMessage.seen = true;
+        setMessages((prevMessages) => [...prevMessages, newMessage]);
+        axios.put(`/api/messages/mark/${newMessage._id}`);
+      } else {
+        setUnseenMessages((prevUnseenMessages) => ({
+          ...prevUnseenMessages,
+          [newMessage.senderId]: prevUnseenMessages[newMessage.senderId]
+            ? prevUnseenMessages[newMessage.senderId] + 1
+            : 1,
+        }));
+      }
+    });
+  };
+
   const value = {};
   return <ChatContext.Provider>{children}</ChatContext.Provider>;
 };
