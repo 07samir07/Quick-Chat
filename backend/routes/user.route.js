@@ -7,7 +7,7 @@ import {
 } from "../controller/user.controller.js";
 import { protectRoute } from "../middleware/auth.middleware.js";
 
-import upload from "../middlewares/multer.controller.js";
+import upload from "../middleware/multer.middleware.js";
 
 const userRouter = express.Router();
 
