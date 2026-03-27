@@ -26,17 +26,17 @@ export const signup = async (req, res) => {
       password: hashedPassword,
       bio: bio,
     });
-    const token = generateToken(userData._id);
+    const token = generateToken(newUser._id);
 
     res.json({
       success: true,
-      userData: newUser,
+      user: newUser,
       token,
       message: "Account created successfully",
     });
   } catch (error) {
     console.log(error.message);
-    res.json({ succes: false, message: error.message });
+    res.json({ success: false, message: error.message });
   }
 };
 
@@ -55,8 +55,13 @@ export const login = async (req, res) => {
     if (!isPasswordCorrect) {
       return res.json({ success: false, message: "Invalid credentitals" });
     }
-    const token = generateToken(newUser._id);
-    res.json({ succes: true, userData, token, message: "Login successful" });
+    const token = generateToken(userData._id);
+    res.json({
+      success: true,
+      user: userData,
+      token,
+      message: "Login successful",
+    });
   } catch (error) {
     console.log(error.message);
     res.json({ success: false, message: error.message });
@@ -65,7 +70,7 @@ export const login = async (req, res) => {
 
 //CONTROLLER TO CHECK IF USER IS AUTHENTICATED
 export const checkAuth = (req, res) => {
-  res.json({ succes: true, user: req.user });
+  res.json({ success: true, user: req.user });
 };
 
 //CONTROLLER TO UPDATE USER PROFILE DETAILS
@@ -95,7 +100,7 @@ export const updatedProfile = async (req, res) => {
         { new: true },
       );
     }
-    res.json({ succes: true, user: updatedUser });
+    res.json({ success: true, user: updatedUser });
   } catch (error) {
     console.log(error.message);
     res.json({ success: false, message: error.message });
