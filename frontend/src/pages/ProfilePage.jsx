@@ -45,36 +45,22 @@ const ProfilePage = () => {
     if (loading) return;
 
     setLoading(true);
+
     try {
-      if (!selectedImg) {
-        const res = await updateProfile({ fullName: name, bio });
-        if (res !== false) navigate("/");
-        return;
+      const formData = new FormData();
+      formData.append("fullName", name);
+      formData.append("bio", bio);
+
+      if (selectedImg) {
+        formData.append("profilePic", selectedImg); // ✅FILE bhejo
       }
 
-      const reader = new FileReader();
+      const res = await updateProfile(formData);
 
-      reader.readAsDataURL(selectedImg);
-
-      reader.onload = async () => {
-        const base64Image = reader.result;
-
-        const res = await updateProfile({
-          profilePic: base64Image,
-          fullName: name,
-          bio,
-        });
-
-        if (res !== false) navigate("/");
-        setLoading(false);
-      };
-
-      reader.onerror = () => {
-        toast.error("Image upload failed");
-        setLoading(false);
-      };
+      if (res !== false) navigate("/");
     } catch (error) {
       toast.error(error.message);
+    } finally {
       setLoading(false);
     }
   };

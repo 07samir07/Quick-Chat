@@ -69,7 +69,9 @@ export const AuthProvider = ({ children }) => {
 
   const updateProfile = async (body) => {
     try {
-      const { data } = await axios.put("/api/auth/update-profile", body);
+      const { data } = await axios.put("/api/auth/update-profile", body, {
+        headers: { "Content-Type": "multupart/form-data" },
+      });
       if (data.success) {
         setAuthUser(data.user);
         toast.success("Profile updated successfully");

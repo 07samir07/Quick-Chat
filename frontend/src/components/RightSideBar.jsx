@@ -23,7 +23,7 @@ const RightSideBar = () => {
       >
         <div className="pt-16 flex flex-col items-center gap-2 text-xs font-light mx-auto">
           <img
-            src={user?.profilePic || assets.avatar_icon}
+            src={selectedUser?.profilePic || assets.avatar_icon}
             alt=""
             className="w-20 aspect-square rounded-full"
           />
