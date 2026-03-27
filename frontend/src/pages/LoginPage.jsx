@@ -4,10 +4,10 @@ import { AuthContext } from "../../context/AuthContext.jsx";
 
 const LoginPage = () => {
   const [currState, setCurrentState] = useState("Sign up");
-  const [fullName, setFullName] = useState();
-  const [email, setEmail] = useState();
-  const [password, setPassword] = useState();
-  const [bio, setBio] = useState();
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [bio, setBio] = useState("");
   const [isDataSubmitted, setIsDataSubmitted] = useState(false);
 
   const { login } = useContext(AuthContext);
