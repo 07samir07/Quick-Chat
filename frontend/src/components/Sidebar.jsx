@@ -21,7 +21,7 @@ const Sidebar = () => {
 
   const navigate = useNavigate();
 
-  const filtererdUsers = input
+  const filteredUsers = input
     ? users.filter((user) =>
         user.fullName.toLowerCase().includes(input.toLowerCase()),
       )
@@ -46,7 +46,7 @@ const Sidebar = () => {
               onClick={() => setMenuOpen(!menuOpen)}
             />
             {menuOpen && (
-              <div className="absolute top-full right-0 z-20 w-32 p-5 rounded-md bg-[#282142] border border-gray-600 text-gray-100 hidden group-hover:block">
+              <div className="absolute top-full right-0 z-20 w-32 p-5 rounded-md bg-[#282142] border border-gray-600 text-gray-100 ">
                 <p
                   onClick={() => navigate("/profile")}
                   className="cursor-pointer text-sm"
@@ -74,13 +74,13 @@ const Sidebar = () => {
       </div>
 
       <div className="flex flex-col">
-        {filtererdUsers.map((user) => (
+        {filteredUsers.map((user, index) => (
           <div
             onClick={() => {
               setSelectedUser(user);
               setUnseenMessages((prev) => ({ ...prev, [user._id]: 0 }));
             }}
-            key={index}
+            key={user._id || index}
             className={`relative flex items-center gap-2 p-2 pl-4 rounded cursor-pointer max-sm:text-sm ${selectedUser?._id === user._id && "bg-[#282142]/50"}`}
           >
             <img
@@ -97,7 +97,7 @@ const Sidebar = () => {
                 <span className="text-neutral-400 text-xs">Offline</span>
               )}
             </div>
-            {unseenMessages[user._id] > 0 && (
+            {(unseenMessages[user._id] || 0) > 0 && (
               <p className="absolute top-4 right-4 text-xs h-5 w-5 flex justify-center items-center rounded-full bg-violet-500/50">
                 {unseenMessages[user._id]}
               </p>
