@@ -76,30 +76,24 @@ export const checkAuth = (req, res) => {
 //CONTROLLER TO UPDATE USER PROFILE DETAILS
 export const updatedProfile = async (req, res) => {
   try {
-    const { profilePic, bio, fullName } = req.body;
-
+    const { bio, fullName } = req.body;
     const userId = req.user._id;
 
-    let updatedUser;
-    if (!profilePic) {
-      updatedUser = await User.findByIdAndUpdate(
-        userId,
-        { bio, fullName },
-        { new: true },
-      );
-    } else {
-      const upload = await cloudinary.uploader.upload(profilePic);
+    let updateData = { bio, fullName };
 
-      updatedUser = await User.findByIdAndUpdate(
-        userId,
-        {
-          profilePic: upload.secure_url,
-          bio,
-          fullName,
-        },
-        { new: true },
-      );
+    // Agar file aayi hai (multer se)
+    if (req.file) {
+      const result = await cloudinary.uploader.upload(req.file.path, {
+        folder: "chat-app-profiles",
+      });
+
+      updateData.profilePic = result.secure_url;
     }
+
+    const updatedUser = await User.findByIdAndUpdate(userId, updateData, {
+      new: true,
+    });
+
     res.json({ success: true, user: updatedUser });
   } catch (error) {
     console.log(error.message);
