@@ -23,7 +23,7 @@ export const AuthProvider = ({ children }) => {
         connectSocket(data.user);
       }
     } catch (error) {
-      toast.error(error.message);
+      toast.error(error.response?.data?.message || error.message);
     }
   };
 
@@ -42,7 +42,7 @@ export const AuthProvider = ({ children }) => {
         toast.error(data.message);
       }
     } catch (error) {
-      toast.error(error.message);
+      toast.error(error.response?.data?.message || error.message);
     }
   };
 
@@ -54,7 +54,7 @@ export const AuthProvider = ({ children }) => {
     setOnlineUsers([]);
     axios.defaults.headers.common["token"] = null;
     toast.success("Logged out successfully");
-    socket.disconnect();
+    socket?.disconnect();
   };
 
   //UPDATE PROFILE FUNCTION TO HANDLE USER PROFILE UPDATES
@@ -67,7 +67,7 @@ export const AuthProvider = ({ children }) => {
         toast.success("Profile updated successfully");
       }
     } catch (error) {
-      toast.error(error.message);
+      toast.error(error.response?.data?.message || error.message);
     }
   };
 

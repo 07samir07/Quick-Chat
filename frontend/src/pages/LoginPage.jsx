@@ -1,6 +1,7 @@
 import React, { useContext, useState } from "react";
 import assets from "../assets/assets.js";
 import { AuthContext } from "../../context/AuthContext.jsx";
+import toast from "react-hot-toast";
 
 const LoginPage = () => {
   const [currState, setCurrentState] = useState("Sign up");
@@ -9,22 +10,26 @@ const LoginPage = () => {
   const [password, setPassword] = useState("");
   const [bio, setBio] = useState("");
   const [isDataSubmitted, setIsDataSubmitted] = useState(false);
+  const [agreed, setAgreed] = useState(false);
+  // const [loading, setLoading] = useState(false);
 
   const { login } = useContext(AuthContext);
 
   const onSubmitHandler = (event) => {
     event.preventDefault();
+    if (currState === "Sign up" && !agreed) {
+      return toast.error("Please accept terms");
+    }
     if (currState === "Sign up" && !isDataSubmitted) {
       setIsDataSubmitted(true);
       return;
     }
 
-    login(currState === "Sign up" ? "signup" : "login", {
-      fullName,
-      email,
-      password,
-      bio,
-    });
+    if (currState === "Sign up") {
+      login("signup", { fullName, email, password, bio });
+    } else {
+      login("login", { email, password });
+    }
   };
   return (
     <div className="min-h-screen bg-cover bg-center flex items-center justify-center gap-8 sm:justify-evenly max-sm:flex-col backdrop-blur-2xl">
@@ -39,7 +44,10 @@ const LoginPage = () => {
           {currState}
           {isDataSubmitted && (
             <img
-              onClick={() => setIsDataSubmitted(false)}
+              onClick={() => {
+                setIsDataSubmitted(false);
+                setBio("");
+              }}
               src={assets.arrow_icon}
               alt=""
               className="w-5 cursor-pointer"
@@ -96,7 +104,10 @@ const LoginPage = () => {
         </button>
 
         <div className="flex items-center gap-2 text-sm text-gray-500">
-          <input type="checkbox" />
+          <input
+            type="checkbox"
+            onChange={(e) => setAgreed(e.target.checked)}
+          />
           <p>Agree to the terms of use & privacy policy.</p>
         </div>
 
@@ -109,6 +120,11 @@ const LoginPage = () => {
                 onClick={() => {
                   setCurrentState("Login");
                   setIsDataSubmitted(false);
+                  setFullName("");
+                  setEmail("");
+                  setPassword("");
+                  setBio("");
+                  setAgreed(false);
                 }}
               >
                 Login here
@@ -119,7 +135,14 @@ const LoginPage = () => {
               Create an account{" "}
               <span
                 className="font-medium text-violet-500 cursor-pointer"
-                onClick={() => setCurrentState("Sign up")}
+                onClick={() => {
+                  setCurrentState("Sign up");
+                  setFullName("");
+                  setEmail("");
+                  setPassword("");
+                  setBio("");
+                  setAgreed(false);
+                }}
               >
                 Click here
               </span>

@@ -20,9 +20,11 @@ export const ChatProvider = ({ children }) => {
       if (data.success) {
         setUsers(data.users);
         setUnseenMessages(data.unseenMessages);
+      } else {
+        toast.error(data.message);
       }
     } catch (error) {
-      toast.error(error.message);
+      toast.error(error.response?.data?.message || error.message);
     }
   };
 
@@ -32,14 +34,20 @@ export const ChatProvider = ({ children }) => {
       const { data } = await axios.get(`/api/messages/${userId}`);
       if (data.success) {
         setMessages(data.messages);
+      } else {
+        toast.error(data.message);
       }
     } catch (error) {
-      toast.error(error.message);
+      toast.error(error.response?.data?.message || error.message);
     }
   };
 
   //FUNCTION TO SEND MESSAGE TO SELECTED USER
   const sendMessage = async (messageData) => {
+    if (!selectedUser) {
+      return toast.error("No user selected");
+    }
+
     try {
       const { data } = await axios.post(
         `/api/messages/send/${selectedUser._id}`,
@@ -51,37 +59,34 @@ export const ChatProvider = ({ children }) => {
         toast.error(data.message);
       }
     } catch (error) {
-      toast.error(error.message);
+      toast.error(error.response?.data?.message || error.message);
     }
   };
 
-  //FUNCTION TO SUBSCRIBE TO MESSAGES FOR SELECTED USER
-  const subscribeToMessages = async () => {
+  useEffect(() => {
     if (!socket) return;
-    socket.on("newMessage", (newMessage) => {
+
+    const handleMessage = (newMessage) => {
       if (selectedUser && newMessage.senderId === selectedUser._id) {
         newMessage.seen = true;
-        setMessages((prevMessages) => [...prevMessages, newMessage]);
-        axios.put(`/api/messages/mark/${newMessage._id}`);
+        setMessages((prev) => [...prev, newMessage]);
+        axios.put(`/api/messages/mark/${newMessage._id}.catch(()=>{})`);
       } else {
-        setUnseenMessages((prevUnseenMessages) => ({
-          ...prevUnseenMessages,
-          [newMessage.senderId]: prevUnseenMessages[newMessage.senderId]
-            ? prevUnseenMessages[newMessage.senderId] + 1
+        setUnseenMessages((prev = {}) => ({
+          ...prev,
+          [newMessage.senderId]: prev[newMessage.senderId]
+            ? prev[newMessage.senderId] + 1
             : 1,
         }));
       }
-    });
-  };
+    };
 
-  //FUNCTION TO UNSUBSCRIBE FROM MESSAGES
-  const unsubscribeFromMessages = () => {
-    if (socket) socket.off("newMessage");
-  };
-  useEffect(() => {
-    subscribeToMessages();
-    return () => unsubscribeFromMessages();
-  }, [socket, selectedUser]);
+    socket.on("newMessage", handleMessage);
+
+    return () => {
+      socket.off("newMessage", handleMessage);
+    };
+  }, [socket, selectedUser, axios]);
 
   const value = {
     messages,

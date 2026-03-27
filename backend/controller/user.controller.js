@@ -26,7 +26,7 @@ export const signup = async (req, res) => {
       password: hashedPassword,
       bio: bio,
     });
-    const token = generateToken(newUser._id);
+    const token = generateToken(userData._id);
 
     res.json({
       success: true,
@@ -46,10 +46,14 @@ export const login = async (req, res) => {
     const { email, password } = req.body;
     const userData = await User.findOne({ email });
 
+    if (!userData) {
+      return res.json({ success: false, message: "User not found" });
+    }
+
     const isPasswordCorrect = await bcrypt.compare(password, userData.password);
 
     if (!isPasswordCorrect) {
-      res.json({ success: false, message: "Invalid credentitals" });
+      return res.json({ success: false, message: "Invalid credentitals" });
     }
     const token = generateToken(newUser._id);
     res.json({ succes: true, userData, token, message: "Login successful" });

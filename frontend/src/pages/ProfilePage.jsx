@@ -1,30 +1,82 @@
-import React, { useContext, useState } from "react";
+import React, { useEffect, useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import assets from "../assets/assets.js";
 import { AuthContext } from "../../context/AuthContext.jsx";
+import toast from "react-hot-toast";
 
 const ProfilePage = () => {
   const { authUser, updateProfile } = useContext(AuthContext);
   const [selectedImg, setSelectedImg] = useState(null);
   const navigate = useNavigate();
-  const [name, setName] = useState(authUser.fullName);
-  const [bio, setBio] = useState(authUser.bio);
+  const [name, setName] = useState(authUser?.fullName || "");
+  const [bio, setBio] = useState(authUser?.bio || "");
+  const [preview, setPreview] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (authUser) {
+      setName(authUser.fullName || "");
+      setBio(authUser.bio || "");
+    }
+  }, [authUser]);
+
+  useEffect(() => {
+    if (!selectedImg) return;
+
+    const url = URL.createObjectURL(selectedImg);
+    setPreview(url);
+
+    return () => URL.revokeObjectURL(url);
+  }, [selectedImg]);
+
+  // Handle image selection with validation
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+
+    if (file && !file.type.startsWith("image/")) {
+      return toast.error("Only image files allowed");
+    }
+
+    setSelectedImg(file);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!selectedImg) {
-      await updateProfile({ fullName: name, bio });
-      navigate("/");
-      return;
-    }
+    if (loading) return;
 
-    const reader = new FileReader();
-    reader.readAsDataURL(selectedImg);
-    reader.onload = async () => {
-      const base64Image = reader.result;
-      await updateProfile({ profilePic: base64Image, fullName: name, bio });
-      navigate("/");
-    };
+    setLoading(true);
+    try {
+      if (!selectedImg) {
+        const res = await updateProfile({ fullName: name, bio });
+        if (res !== false) navigate("/");
+        return;
+      }
+
+      const reader = new FileReader();
+
+      reader.readAsDataURL(selectedImg);
+
+      reader.onload = async () => {
+        const base64Image = reader.result;
+
+        const res = await updateProfile({
+          profilePic: base64Image,
+          fullName: name,
+          bio,
+        });
+
+        if (res !== false) navigate("/");
+        setLoading(false);
+      };
+
+      reader.onerror = () => {
+        toast.error("Image upload failed");
+        setLoading(false);
+      };
+    } catch (error) {
+      toast.error(error.message);
+      setLoading(false);
+    }
   };
 
   return (
@@ -40,18 +92,14 @@ const ProfilePage = () => {
             className="flex items-center gap-3 cursor-pointer"
           >
             <input
-              onChange={(e) => setSelectedImg(e.target.files[0])}
+              onChange={handleImageChange}
               type="file"
               id="avatar"
               accept=".png, .jpg, .jpeg"
               hidden
             />
             <img
-              src={
-                selectedImg
-                  ? URL.createObjectURL(selectedImg)
-                  : assets.avatar_icon
-              }
+              src={preview || authUser?.profilePic || assets.avatar_icon}
               alt=""
               className={`w-12 h-12 ${selectedImg && "rounded-full"}`}
             />
@@ -73,13 +121,17 @@ const ProfilePage = () => {
             rows={4}
           ></textarea>
 
+          {/* BUTTON */}
           <button
             type="submit"
-            className="bg-gradient-to-r from bg-purple-400 to-violet-600 text-white p-2 rounded-full text-lg cursor-pointer"
+            disabled={loading}
+            className="bg-gradient-to-r from-purple-400 to-violet-600 text-white p-2 rounded-full text-lg cursor-pointer"
           >
-            Save
+            {loading ? "Saving..." : "Save"}
           </button>
         </form>
+
+        {/*  RIGHT IMAGE  */}
         <img
           className={`max-w-44 aspect-square rounded-full mx-10 max-sm:mt-10 ${selectedImg && "rounded-full"} `}
           src={authUser?.profilePic || assets.logo_icon}
