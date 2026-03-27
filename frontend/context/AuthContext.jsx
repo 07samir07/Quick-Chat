@@ -12,6 +12,7 @@ export const AuthProvider = ({ children }) => {
   const [authUser, setAuthUser] = useState(null);
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [socket, setSocket] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   //CHECK IF USERR IS AUTHENTICATED AND IF SO, SET THE USER DATA AND CONNECT THE SOCKET
 
@@ -29,6 +30,8 @@ export const AuthProvider = ({ children }) => {
 
   //LOGIN FUNCTION TO HANDLE USER AUTHENTICATION AND SOCKET CONNECTION
   const login = async (state, credentials) => {
+    if (loading) return; // prevent multiple clicks
+    setLoading(true);
     try {
       const { data } = await axios.post(`/api/auth/${state}`, credentials);
       if (data.success) {
@@ -38,11 +41,15 @@ export const AuthProvider = ({ children }) => {
         setToken(data.token);
         localStorage.setItem("token", data.token);
         toast.success(data.message);
+      } else if (data.message === "User already exists") {
+        toast.error("User already exists. Try logging in!");
       } else {
         toast.error(data.message);
       }
     } catch (error) {
       toast.error(error.response?.data?.message || error.message);
+    } finally {
+      setLoading(false);
     }
   };
 

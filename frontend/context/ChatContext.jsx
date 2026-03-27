@@ -69,10 +69,13 @@ export const ChatProvider = ({ children }) => {
     const handleMessage = (newMessage) => {
       if (selectedUser && newMessage.senderId === selectedUser._id) {
         newMessage.seen = true;
-        setMessages((prev) => [...prev, newMessage]);
-        axios.put(`/api/messages/mark/${newMessage._id}.catch(()=>{})`);
+        setMessages((prev) => {
+          if (prev.find((msg) => msg._id === newMessage._id)) return prev;
+          return [...prev, newMessage];
+        });
+        axios.put(`/api/messages/mark/${newMessage._id}`).catch(() => {});
       } else {
-        setUnseenMessages((prev = {}) => ({
+        setUnseenMessages((prev) => ({
           ...prev,
           [newMessage.senderId]: prev[newMessage.senderId]
             ? prev[newMessage.senderId] + 1

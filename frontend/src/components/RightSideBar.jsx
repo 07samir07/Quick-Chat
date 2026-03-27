@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useMemo, useContext, useEffect, useState } from "react";
 import assets from "../assets/assets.js";
 import { ChatContext } from "../../context/ChatContext.jsx";
 import { AuthContext } from "../../context/AuthContext.jsx";
@@ -6,12 +6,15 @@ import { AuthContext } from "../../context/AuthContext.jsx";
 const RightSideBar = () => {
   const { selectedUser, messages } = useContext(ChatContext);
   const { logout, onlineUsers } = useContext(AuthContext);
-  const [msgImages, setMsgImages] = useState([]);
+  // const [msgImages, setMsgImages] = useState([]);
 
   //GET ALL IMAGES FROM THE MESSAGES AND SET THEM TO STATE
-  useEffect(() => {
-    setMsgImages(messages.filter((msg) => msg.image).map((msg) => msg.image));
-  }, [messages]);
+  const msgImages = useMemo(
+    () => messages.filter((msg) => msg.image).map((msg) => msg.image),
+    [messages],
+  );
+
+  if (!selectedUser) return null;
 
   return (
     selectedUser && (
@@ -42,11 +45,11 @@ const RightSideBar = () => {
           {msgImages.length === 0 ? (
             <p className="text-gray-400 mt-2">No media shared</p>
           ) : (
-            <div className="mt-2 max-h-50 overflow-y-scroll grid grid-cols-2 gap-4 opacity-80">
-              {msgImages.map((url, index) => (
+            <div className="mt-2 max-h-48 overflow-y-scroll grid grid-cols-2 gap-4 opacity-80">
+              {msgImages.map((url, idx) => (
                 <div
-                  key={index}
-                  onClick={() => window.open(url)}
+                  key={url + idx}
+                  onClick={() => window.open(url, "_blank")}
                   className="cursor-pointer rounded"
                 >
                   <img src={url} alt="" className="h-full rounded-md" />
